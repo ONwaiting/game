@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .bg {
+            width: 320px;
+            height: 568px;
+            margin: 0 auto;
+            position: relative;
+            background-image: url('./img/background.png');
+            overflow: hidden;
+        }
+
+        .bg>.plane {
+            width: 66px;
+            height: 80px;
+            position: absolute;
+            bottom: 0;
+            background-image: url('./img/myplane.gif');
+            background-repeat: no-repeat;
+            background-position: 50% 50%;
+        }
+
+        .bullet {
+            width: 6px;
+            height: 14px;
+            position: absolute;
+            background-image: url('./img/bullet.png');
+        }
+        .bg>span{
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 70px;
+            height: 30px;
+            z-index: 2;
+            line-height: 30px;
+            text-align: center;
+            margin:5px;
+        }
+        .over{
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(155,155,155,.7);
+            z-index: 9;
+        }
+        .inner{
+            width: 240px;
+            height: 220px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin:auto;
+            /* background-color: red; */
+            border-radius: 10px;
+            border:1px solid;
+            text-align: center;
+        }
+        .inner>button{
+            margin-top:150px;
+            width: 80px;
+            height: 30px;
+            border-radius: 10px;
+            background: url("./img/background.png");
+            outline: none;
+            border: 3px solid #ccc;
+        }
+        .inner>.go{
+            position: absolute;
+            left:0;
+            right:0;
+            top: 10px;
+            color: red;
+            font-size: 1.5em;
+        }
+        .inner>.eScore{
+            position: absolute;
+            left:0;
+            right:0;
+            top: 110px;
+            font-size: 1em;
+        }
+        .inner>.talk{
+            position: absolute;
+            left:0;
+            right:0;
+            top: 50px;
+            color: green;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg">
+        <div class="plane"></div>
+        <span>得分:0</span>
+        <div class="over">
+            <div class="inner">
+                <button>再试一次</button>
+                <span class="go">Game Over</span>
+                <span class="eScore">得分:0</span>
+                <span class="talk">用脚打游戏</span>
+            </div>
+        </div>
+    </div>
+</body>
+<script>
+    function Plane() {
+        this.bg = document.querySelector('.bg');
+        this.plane = document.querySelector('.plane');
+        this.scoreNum=0;
+        this.scoreShow=document.querySelector('.bg>span');
+        this.gameover=document.querySelector('.over');
+        this.eScore=document.querySelector('.eScore');
+        this.talk=document.querySelector('.talk');
+        this.again=document.querySelector('button');
+        this.time0=null;
+    }
+    Plane.prototype = {
+        constructor: Plane,
+        init: function () {
+            this.plane.style.left = this.bg.offsetWidth / 2 - this.plane.offsetWidth / 2 + 'px';
+            this.gameover.style.display='none';
+            this.again.onclick=function(){
+                window.location.reload(true);
+            }
+            this.move();
+            this.bullets();
+            this.army();
+        },
+        //鼠标移动函数
+        move: function () {
+            var that = this;
+            this.bg.onmouseenter = function () {
+                var x, y;
+                document.onmousemove = function (ev) {
+                    var ev = ev || window.event;
+                    x = ev.clientX - that.plane.offsetWidth / 2 - that.bg.offsetLeft;
+                    y = ev.clientY - that.plane.offsetHeight / 2 - that.bg.offsetTop;
+                    that.plane.style.left = x + 'px';
+                    that.plane.style.top = y + 'px';
+                    if (x < 0) {
+                        that.plane.style.left = 0;
+                    }
+                    if (y < 0) {
+                        that.plane.style.top = 0;
+                    }
+                    if (x > that.bg.offsetWidth - that.plane.offsetWidth) {
+                        that.plane.style.left = that.bg.offsetWidth - that.plane.offsetWidth + 'px';
+                    }
+                    if (y > that.bg.offsetHeight - that.plane.offsetHeight) {
+                        that.plane.style.top = that.bg.offsetHeight - that.plane.offsetHeight + 'px';
+                    }
+                }
+                this.onmouseleave = function () {
+                    document.onmousemove = null;
+                    clearInterval(that.time0);
+                }
+                return false;
+            }
+        },
+        //子弹
+        bullets: function () {
+            var that = this;
+            // var timer = null;
+            this.plane.onmousedown = function () {
+                clearInterval(that.time0);
+                that.time0 = setInterval(function () {
+                    var bullet = document.createElement('div');
+                    var speed = 0;
+                    bullet.className = 'bullet';
+                    bullet.style.top = that.plane.offsetTop + speed - 14 + 'px';
+                    bullet.style.left = that.plane.offsetLeft + that.plane.offsetWidth / 2 - 2 +
+                        'px';
+                    that.bg.appendChild(bullet);
+                    var timer2 = setInterval(function () {
+                        speed = -1;
+                        bullet.style.top = bullet.offsetTop + speed - 14 + 'px';
+                        if (bullet.offsetTop < 0) {
+                            that.bg.removeChild(bullet);
+                        }
+                    }, 20);
+                }, 150);
+                return false;
+            }
+            this.plane.onmouseup = function () {
+                clearInterval(that.time0);
+            }
+        },
+        //敌机
+        army: function () {
+            var that = this;
+            var arr = ["./img/bigplane.png", "./img/midplane.png", "./img/smallplane.png",
+                "./img/smallplane.png", "./img/smallplane.png", "./img/smallplane.png",
+                "./img/smallplane.png"
+            ];
+            var time2 = null;
+            var time = setInterval(function () {
+                var img = document.createElement('img');
+                img.style.cssText = `position:absolute;top:-150px;`;
+                var a = Math.floor(Math.random() * arr.length);
+                img.src = arr[a];
+                img.speed = Math.random() * 10 + 3;
+                img.dataset.flag = 1;
+                var b;
+                if (a === 0) {
+                    b = Math.random() * (that.bg.offsetWidth - 110);
+                    img.dataset.blood = 10;
+                } else if (a === 1) {
+                    b = Math.random() * (that.bg.offsetWidth - 46);
+                    img.dataset.blood = 5;
+                } else {
+                    b = Math.random() * (that.bg.offsetWidth - 34);
+                }
+                img.style.left = b + 'px';
+                that.bg.appendChild(img);
+                var imgList = document.querySelectorAll('img');
+                for (var i = 0; i < imgList.length; i++) {
+                    if (imgList[i].offsetLeft > that.bg.offsetWidth - imgList[i].offsetWidth) {
+                        imgList[i].style.left = that.bg.offsetWidth - imgList[i].offsetWidth + 'px';
+                    }
+                }
+                // var flag = true;
+                img.timer = setInterval(() => {
+                    img.style.top = img.offsetTop + img.speed + 'px';
+                    //碰撞反馈
+                    if (that.score()) {
+                        var imgB = that.score().e;
+                        var imgT=that.score().b;
+                        that.bg.removeChild(imgT);
+                        imgT.src="./img/boom.png";
+                        if (imgB.offsetWidth < 35) {
+                            imgB.src = "./img/smallplaneboom.gif";
+                            clearInterval(imgB.timer);
+                            if (imgB.dataset.flag == 1) {
+                                imgB.timer3 = setTimeout(function () {
+                                    that.bg.removeChild(imgB);
+                                    flag = true;
+                                    that.scoreNum++;
+                                    console.log(that.scoreShow);
+                                    that.scoreShow.innerHTML="得分:"+that.scoreNum;
+                                    clearTimeout(imgB.timer3);                                   
+                                }, 200);
+                            }
+                            imgB.dataset.flag = 0;
+                        } else if (imgB.offsetWidth < 47) {
+                            imgB.dataset.blood = imgB.dataset.blood - 1;
+                            if (imgB.dataset.blood <= 0) {
+                                imgB.src = "./img/midplaneboom.gif";
+                                clearInterval(imgB.timer);
+                                if (imgB.dataset.flag == 1) {
+                                    imgB.timer3 = setTimeout(function () {
+                                        that.bg.removeChild(imgB);
+                                        flag = true;
+                                        that.scoreNum+=5;
+                                        that.scoreShow.innerHTML="得分:"+that.scoreNum;
+                                        clearTimeout(imgB.timer3);
+                                    }, 200);
+                                }
+                                imgB.dataset.flag = 0;
+                            }
+                        } else {
+                            imgB.dataset.blood = imgB.dataset.blood - 1;
+                            if (imgB.dataset.blood <= 0) {
+                                imgB.src = "./img/bigplaneboom.gif";
+                                clearInterval(imgB.timer);
+                                if (imgB.dataset.flag == 1) {
+                                    imgB.timer3 = setTimeout(function () {
+                                        that.bg.removeChild(imgB);
+                                        flag = true;
+                                        that.scoreNum+=10;
+                                        that.scoreShow.innerHTML="得分:"+that.scoreNum;
+                                        clearTimeout(imgB.timer3);
+                                    }, 200);
+                                }
+                                imgB.dataset.flag = 0;
+                            }
+
+                        }
+                    }
+                    //飞机溢出删除
+                    if (img.offsetTop > that.bg.offsetHeight) {
+                        that.bg.removeChild(img);
+                    }
+                    //游戏结束
+                    if (that.over()) {
+                        that.plane.style.backgroundImage = "url(./img/myplaneBoom.gif)";
+                        clearInterval(time);
+                        clearInterval(img.timer);
+                        document.onmousemove = null;
+                        if (time2 === null) {
+                            time2 = setTimeout(function () {
+                                that.eScore.innerHTML="得分:"+that.scoreNum;
+                                if(that.scoreNum<100){
+                                    that.talk.innerHTML='用脚打游戏';
+                                }else{
+                                    that.talk.innerHTML='人类的感觉';
+                                }
+                                that.gameover.style.display='block';
+                            }, 500);
+                        }
+
+                    }
+                }, 100);
+            }, 800)
+        },
+        //碰撞检测
+        meet: function (obj0, obj1) {
+            if ((obj0.offsetLeft + obj0.offsetWidth >= obj1.offsetLeft) && (obj0.offsetLeft < obj1.offsetLeft +
+                    obj1.offsetWidth) &&
+                (obj0.offsetTop + obj0.offsetHeight >= obj1.offsetTop) && (obj0.offsetTop < obj1.offsetTop +
+                    obj1.offsetHeight)
+            ) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+        //得分
+        score: function () {
+            this.bulletList = document.querySelectorAll('.bullet');
+            this.enemy = document.querySelectorAll('img');
+            for (var i = 0; i < this.bulletList.length; i++) {
+                for (var j = 0; j < this.enemy.length; j++) {
+                    if (this.meet(this.bulletList[i], this.enemy[j])) {
+                        return {
+                            state: true,
+                            e: this.enemy[j],
+                            b:this.bulletList[i]
+                        }
+                    }
+                }
+            }
+        },
+        //游戏结束
+        over: function () {
+            // var enemy = document.querySelectorAll('img');
+            for (var i = 0; i < this.enemy.length; i++) {
+                if (this.meet(this.plane, this.enemy[i])) {
+                    return true;
+                }
+            }
+        }
+    }
+    new Plane().init();
+</script>
+
+</html>

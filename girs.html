@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            height: 100%;
+            width: 100%;
+            background: url('./img/snow-bg.jpg') no-repeat center top;
+            background-size: cover;
+            overflow: hidden;
+        }
+
+        .box {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            margin: auto;
+            width: 1090px;
+            height: 430px;
+            background-color: rgb(85, 83, 146);
+            box-shadow: 0 0 5px 5px #eee;
+            border-radius: 30px;
+            padding:20px;
+            line-height: 430px;
+            color: antiquewhite;
+            font-size: 2em;
+            text-align: center;
+        }
+        img{
+            width: 164px;
+            height: 84px;
+            float: left;
+            margin: 5px;
+            border: 2px solid #fff;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div class="box">
+    </div>
+</body>
+<script src="./anim.js"></script>
+<script>
+    class snow {
+        constructor() {
+            this.show=document.querySelector('.box');
+            this.chang=12;
+        }
+        init() {
+            var that = this;
+            for (let i = 0; i < this.ran(30, 50); i++) {
+                var div = document.createElement('div');
+                var r = this.ran(4, 10);
+                div.style.cssText =
+                    `position:absolute;width:${r}px;
+                    height:${r}px;top:${this.ran(0,document.documentElement.clientHeight)}px;
+                    left:${this.ran(20,document.documentElement.clientWidth-20)}px;
+                    border-radius:50%;background:#fff;z-index=1`;
+                // console.log(div);
+                document.body.appendChild(div);
+                this.move(div, i);
+            }
+            var timer = setInterval(function () {
+                that.createSnow();
+            }, 150);
+            this.pushPic();
+            this.compare();
+        }
+
+        ran(min, max) {
+            return Math.round(Math.random() * (max - min) + min);
+        }
+        createSnow() {
+            var div = document.createElement('div');
+            var r = this.ran(4, 10);
+            div.style.cssText =
+                `position:absolute;width:${r}px;
+                    height:${r}px;top:30px;
+                    left:${this.ran(20,document.documentElement.clientWidth-20)}px;
+                    border-radius:50%;background:#fff;z-index=1`;
+            document.body.appendChild(div);
+            this.move(div);
+        }
+        move(obj) {
+            clearInterval(obj.timer);
+            clearInterval(obj.timer2);
+            var that = this;
+            var speed = 5;
+            var speedx = parseInt((Math.random() > 0.5 ? '-' : '') + that.ran(2, 8));
+            obj.timer2 = setInterval(function () {
+                speedx = parseInt((Math.random() > 0.5 ? '-' : '') + that.ran(2, 8));
+            }, 500);
+            obj.timer = setInterval(function () {
+                obj.style.top = obj.offsetTop + speed + 'px';
+                obj.style.left = obj.offsetLeft + speedx + 'px';
+                if (obj.offsetTop > document.documentElement.clientHeight) {
+                    document.body.removeChild(obj);
+                    clearInterval(obj.timer);
+                    clearInterval(obj.timer2);
+                }
+            }, 50);
+        }
+        getP() {
+            var arr = [];
+            var result = [];
+            for (let i = 1; i <= 12; i++) {
+                arr.push(i);
+            }
+            for (let i = 1; i <= 12; i++) {
+                arr.push(i);
+            }
+            while (result.length < 24) {
+                let a = this.ran(1, 12);
+                if (arr.indexOf(a)!==-1) {
+                    result.push(a);
+                    let b=arr.indexOf(a);
+                    arr.splice(b,1);
+                }
+            }
+            
+            console.log(result);
+            return result;
+        }
+        pushPic() {
+            var arr=this.getP()
+            for (var i = 0; i < arr.length; i++) {
+                this.pic = document.createElement('img');
+                this.pic.dataset.posi=arr[i];
+                this.pic.src="./img/role"+arr[i]+".jpg";
+                this.show.appendChild(this.pic);
+            }
+        }
+        compare(){
+            var that=this;
+            var oldObj=null;
+            var nextObj=null;
+            var flag=false;
+            var p;//判定重复点击
+            this.pics=document.querySelectorAll('img');
+            for(let i=0;i<this.pics.length;i++){
+                this.pics[i].index=i;
+                this.pics[i].onclick=function(){
+                    for(let i=0;i<that.pics.length;i++){
+                        that.pics[i].style.borderColor='#fff';
+                    }
+                    this.style.borderColor='blue';      
+                    if(flag&&p!=this.index){
+                        oldObj=nextObj;
+                    }
+                    p=this.index;
+                    nextObj=this;
+                    flag=true;
+                    if(oldObj&&nextObj.dataset.posi===oldObj.dataset.posi){
+                        oldObj.style.borderColor='blue';
+                        anim(oldObj,{
+                            opacity:0
+                        },function(){
+                            that.chang--;
+                            if(that.chang<=0){
+                                that.show.innerHTML='未完待续.....';
+                            }
+                        });
+                        anim(nextObj,{
+                            opacity:0
+                        });
+                    } 
+                }
+            }
+        }
+    }
+    new snow().init();
+</script>
+
+</html>

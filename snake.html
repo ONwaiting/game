@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .game {
+            width: 600px;
+            height: 405px;
+            background-color: rgba(0, 255, 149, 0.6);
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border: 2px solid;
+            box-shadow: 3px 3px 3px #ccc;
+            margin: auto;
+        }
+
+        button {
+            outline: none;
+            position: absolute;
+            left: 0;
+            line-height: 40px;
+            width: 150px;
+            background-color: rgba(76, 0, 255, 0.4);
+            border-radius: 5px;
+            cursor: pointer;
+            box-shadow: 3px 3px 3px #ccc;
+            border: 1px solid saddlebrown;
+        }
+        button:active{
+            background: olive;
+        }
+        .game>.head{
+            background-color: red;
+        }
+        .game>div{
+            height: 15px;
+            width: 15px;
+            position: absolute;
+            left: 0;
+            background-color: black;
+            border-radius: 50%;
+        }
+        .game>.food{
+            background: blue;
+        }
+    </style>
+    <script src="./snake.js"></script>
+</head>
+
+<body>
+    <div class="game">
+        <div></div>
+        <div></div>
+        <div class="head"></div>
+    </div>
+    <button>开始游戏</button>
+    <button>暂停游戏</button>
+</body>
+
+</html>
